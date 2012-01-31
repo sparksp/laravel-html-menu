@@ -1,8 +1,11 @@
 # Τόπος Bundle, by Phill Sparks
 
-A HTML Menu Generator for Laravel.  Install by dropping into your **bundles** directory.
+A HTML Menu Generator for Laravel, installable via the Artisan CLI:
 
-    // Generate a simple navigation menu
+    php artisan bundle:install topos
+    
+Generate a simple navigation menu ('ul' is default):
+
     echo Topos\Menu::make(array('class' => 'menu'), 'ol')
         ->add('', 'Home')
         ->add('blog', 'Blog')
