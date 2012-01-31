@@ -1,13 +1,13 @@
-<?php namespace Menu;
+<?php namespace Topos;
 
 use URL, Request, HTML;
 
 /**
- * HTML Menu Generator for Laravel
+ * Τόπος - HTML Menu Generator for Laravel
  * 
  * <code>
  *     // Generate a simple navigation menu
- *     echo Menu\Menu::make(array('class' => 'nav'), 'ol')
+ *     echo Topos\Menu::make(array('class' => 'nav'), 'ol')
  *         ->add('', 'Home')
  *         ->add('blog', 'Blog')
  *         ->add('about', 'About')
