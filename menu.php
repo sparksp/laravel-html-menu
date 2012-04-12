@@ -107,16 +107,16 @@ class Menu {
 	/**
 	 * Add an item if the test is true
 	 *
-	 * @param  bool    $test
+	 * @param  bool|callback  $test
 	 * @param  string  $url
 	 * @param  string  $title
-	 * @param  array   $attributes
-	 * @param  bool    $https
+	 * @param  array  $attributes
+	 * @param  bool  $https
 	 * @return Menu
 	 */
 	function add_if($test, $url, $title, $attributes = array(), $https = false)
 	{
-		if ($test)
+		if (value($test))
 		{
 			$this->add($url, $title, $attributes, $https);
 		}
