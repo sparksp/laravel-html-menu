@@ -231,7 +231,7 @@ class Menu {
 	 * @param  string  $type  One of 'ol' or 'ul'.  If not provided then render using the menu's type.
 	 * @return string
 	 */
-	function get($type = null)
+	function render($type = null)
 	{
 		if (!in_array($type, array('ol', 'ul'))) $type = $this->type;
 		$html = '';
@@ -260,6 +260,19 @@ class Menu {
 		{
 			return '';
 		}
+	}
+
+	/**
+	 * Renders the menu (deprecated)
+	 * 
+	 * @deprecated
+	 * @param  string  $type
+	 * @return  string
+	 */
+	function get($type = null)
+	{
+		trigger_error('Deprecated: $menu->get() is deprecated, please use $menu->render() instead.', E_USER_DEPRECATED);
+		return $this->render($type);
 	}
 
 }
