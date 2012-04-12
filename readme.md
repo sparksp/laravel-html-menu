@@ -40,3 +40,18 @@ echo Topos\Menu::make(array('class' => 'menu'), 'ol')
     ->add('contact', 'Contact')
     ->get();
 ```
+
+## Optional menu items
+
+You can also use `->add_if($test, $url, $label)` to conditionally add items, test can be any callback or boolean.
+
+```php
+echo Topos\Menu::make()
+    ->add('', 'Home')
+    ->add('blog', 'Blog')
+    // Only show the admin item if we're in admin area
+    ->add_if(URI::is('admin(/*)?'), 'admin', 'Admin')
+    // Only show the logout link if we're logged in
+    ->add_if(Auth::check(), 'logout', 'Logout')
+    ->render();
+```
