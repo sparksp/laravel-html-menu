@@ -1,6 +1,6 @@
 <?php namespace Topos;
 
-use URL, Request, HTML;
+use URI, URL, Request, HTML;
 
 /**
  * Τόπος - HTML Menu Generator for Laravel
@@ -242,7 +242,7 @@ class Menu {
 			$class = array(); $link = true;
 			if ($n === 0) $class[] = 'first';
 			if ($n === $c - 1) $class[] = 'last';
-			if (self::isActiveURL($item->url, $item->https))
+			if (URI::is($item->url.'(/*)?'))
 			{
 				$class[] = 'active';
 				$link = $this->linkActive;
@@ -262,31 +262,6 @@ class Menu {
 		}
 	}
 
-	/**
-	 * Determine whether the given URL is handled by the current request
-	 *
-	 * @param  string  $url
-	 * @param  bool    $https
-	 * @return bool
-	 */
-	static function isActiveURL($url, $https = false)
-	{
-		$here  = URL::to(Request::uri(), $https);
-		$there = URL::to(preg_replace('/#.*$/', '', $url), $https);
-
-		if ($url == '/')
-		{
-			return ($here == $there);
-		}
-		elseif (false !== $p = strpos($here, '/', min(strlen($here), strlen($there))))
-		{
-			return (strncmp($here, $there, strlen($there)) === 0);
-		}
-		else
-		{
-			return (strcmp($here, $there) === 0);
-		}
-	}
 }
 
 /**
