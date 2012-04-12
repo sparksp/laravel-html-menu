@@ -38,10 +38,10 @@ echo Topos\Menu::make(array('class' => 'menu'), 'ol')
     ->add('blog', 'Blog')
     ->add('about', 'About')
     ->add('contact', 'Contact')
-    ->get();
+    ->render();
 ```
 
-## Optional menu items
+### Optional menu items
 
 You can also use `->add_if($test, $url, $label)` to conditionally add items, test can be any callback or boolean.
 
