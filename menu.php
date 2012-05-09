@@ -8,10 +8,11 @@ use URI, URL, Request, HTML;
  * <code>
  *     // Generate a simple navigation menu
  *     echo Topos\Menu::make(array('class' => 'nav'), 'ol')
- *         ->add('', 'Home')
- *         ->add('blog', 'Blog')
- *         ->add('about', 'About')
- *         ->add('contact', 'Contact')
+ *         ->link('', 'Home')
+ *         ->link('blog', 'Blog')
+ *         ->divider('', array('class' => 'divider'))
+ *         ->link('about', 'About')
+ *         ->link('contact', 'Contact')
  *         ->get();
  * </code>
  *
@@ -90,7 +91,7 @@ class Menu {
 	}
 
 	/**
-	 * Add an item to the menu
+	 * Add an link to the menu
 	 *
 	 * @param  string  $url
 	 * @param  string  $title
@@ -98,14 +99,27 @@ class Menu {
 	 * @param  bool    $https
 	 * @return Menu
 	 */
-	function add($url, $title, array $attributes = array(), $https = false)
+	function link($url, $title, array $attributes = array(), $https = false)
 	{
-		$this->items[] = new Menu_Item($url, $title, $attributes, $https);
+		$this->items[] = new Menu_Link($url, $title, $attributes, $https);
 		return $this;
 	}
 
+    /**
+     * Add an divider to the menu
+     *
+     * @param  string  $title
+     * @param  array   $attributes
+     * @return Menu
+     */
+    function divider($title, array $attributes = array())
+    {
+        $this->items[] = new Menu_Divider($title, $attributes);
+        return $this;
+    }
+
 	/**
-	 * Add an item if the test is true
+	 * Add an link if the test is true
 	 *
 	 * @param  bool|callback  $test
 	 * @param  string  $url
@@ -114,14 +128,33 @@ class Menu {
 	 * @param  bool  $https
 	 * @return Menu
 	 */
-	function add_if($test, $url, $title, $attributes = array(), $https = false)
+	function link_if($test, $url, $title, $attributes = array(), $https = false)
 	{
 		if (value($test))
 		{
-			$this->add($url, $title, $attributes, $https);
+			$this->link($url, $title, $attributes, $https);
 		}
 		return $this;
 	}
+
+    /**
+     * Add an divider if the test is true
+     *
+     * @param  bool|callback  $test
+     * @param  string  $url
+     * @param  string  $title
+     * @param  array  $attributes
+     * @param  bool  $https
+     * @return Menu
+     */
+    function divider_if($test, $title, array $attributes = array())
+    {
+        if (value($test))
+        {
+            $this->divider($title, $attributes);
+        }
+        return $this;
+    }
 
 	/**
 	 * If no arguments are provided returns the type of this menu, otherwise sets the type of the menu and returns the menu.
@@ -234,23 +267,45 @@ class Menu {
 	function render($type = null)
 	{
 		if (!in_array($type, array('ol', 'ul'))) $type = $this->type;
+
 		$html = '';
-		
-		$n = 0; $c = count($this->items);
-		foreach ($this->items as $item)
-		{
-			$class = array(); $link = true;
-			if ($n === 0) $class[] = 'first';
-			if ($n === $c - 1) $class[] = 'last';
-			if (URI::is($item->url.'(/*)?'))
-			{
-				$class[] = 'active';
-				$link = $this->linkActive;
-			}
-			$html .= '<li'.HTML::attributes(array('class' => implode(' ', $class))).'>'.($link ? $item->get_link() : $item->get_span()).'</li>';
-			
-			$n++;
-		}
+
+        $items_no = count($this->items);
+        $link_pointer = 0;
+        $link_pointer_max = $items_no - 1;
+
+        for ($i = 0; $i < $items_no; $i++)
+        {
+            if ($this->items[$i] instanceof Menu_Link)
+            {
+                $class = array(); $link = true;
+
+                if ($link_pointer === 0) $class[] = 'first';
+                if ($link_pointer === $link_pointer_max
+                    or (isset($this->items[$i + 1])
+                        and $this->items[$i + 1] instanceof Menu_Divider)
+                    or (! isset($this->items[$i + 1])))
+                {
+                    $class[] = 'last';
+                }
+
+                if (URI::is($this->items[$i]->url.'(/*)?'))
+                {
+                    $class[] = 'active';
+                    $link = $this->linkActive;
+                }
+
+                $link_pointer++;
+
+                $html .= '<li'.HTML::attributes(array('class' => implode(' ', $class))).'>'.($link ? $this->items[$i]->get_link() : $this->items[$i]->get_span()).'</li>';
+            }
+            elseif ($this->items[$i] instanceof Menu_Divider)
+            {
+                $link_pointer = 0;
+
+                $html .= $this->items[$i]->get_divider();
+            }
+        }
 		
 		if ($html != '')
 		{
@@ -278,12 +333,12 @@ class Menu {
 }
 
 /**
- * HTML Menu Item
+ * HTML Menu Link
  *
  * @see Menu
  * @internal
  */
-class Menu_Item {
+class Menu_Link {
 
 	/**
 	 * @var string
@@ -308,7 +363,7 @@ class Menu_Item {
 	public $https = false;
 
 	/**
-	 * Create a new Menu_Item
+	 * Create a new Menu_Link
 	 *
 	 * @param  string  $url
 	 * @param  string  $title
@@ -324,7 +379,7 @@ class Menu_Item {
 	}
 
 	/**
-	 * Returns a HTML link of this menu item
+	 * Returns a HTML link of this menu link
 	 *
 	 * @uses Laravel\HTML::link()  Generates the HTML link
 	 */
@@ -334,7 +389,7 @@ class Menu_Item {
 	}
 
 	/**
-	 * Returns a HTML span of this menu item
+	 * Returns a HTML span of this menu link
 	 *
 	 * @uses Laravel\HTML::span()  Generates the HTML span
 	 */
@@ -342,5 +397,49 @@ class Menu_Item {
 	{
 		return HTML::span($this->title, $this->attributes);
 	}
+
+}
+
+/**
+ * HTML Menu Divider
+ *
+ * @see Menu
+ * @internal
+ */
+class Menu_Divider {
+
+    /**
+     * @var string
+     */
+    public $title = '';
+
+    /**
+     * Array of HTML attributes added to link and span.
+     *
+     * @var array
+     */
+    public $attributes = array();
+
+    /**
+     * Create a new Menu_Divider
+     *
+     * @param  string  $title
+     * @param  array   $attributes
+     */
+    function __construct($title, array $attributes = array())
+    {
+        $this->title = $title;
+        $this->attributes = $attributes;
+    }
+
+    /**
+     * Returns a divider menu item
+     *
+     * @uses Laravel\HTML::attributes()  Generates the HTML attributes
+     */
+    function get_divider()
+    {
+        return '<li'.HTML::attributes($this->attributes).'>'.$this->title.'</li>';
+    }
 
 }
