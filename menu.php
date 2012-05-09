@@ -10,6 +10,7 @@ use URI, URL, Request, HTML;
  *     echo Topos\Menu::make(array('class' => 'nav'), 'ol')
  *         ->add('', 'Home')
  *         ->add('blog', 'Blog')
+ *         ->add_divider('', array('class' => 'divider'))
  *         ->add('about', 'About')
  *         ->add('contact', 'Contact')
  *         ->get();
@@ -103,6 +104,19 @@ class Menu {
 		$this->items[] = new Menu_Item($url, $title, $attributes, $https);
 		return $this;
 	}
+
+    /**
+     * Add an divider to the menu
+     *
+     * @param  string  $title
+     * @param  array   $attributes
+     * @return Menu
+     */
+    function add_divider($title, array $attributes = array())
+    {
+        $this->items[] = new Menu_Divider($title, $attributes);
+        return $this;
+    }
 
 	/**
 	 * Add an item if the test is true
@@ -239,15 +253,22 @@ class Menu {
 		$n = 0; $c = count($this->items);
 		foreach ($this->items as $item)
 		{
-			$class = array(); $link = true;
-			if ($n === 0) $class[] = 'first';
-			if ($n === $c - 1) $class[] = 'last';
-			if (URI::is($item->url.'(/*)?'))
-			{
-				$class[] = 'active';
-				$link = $this->linkActive;
-			}
-			$html .= '<li'.HTML::attributes(array('class' => implode(' ', $class))).'>'.($link ? $item->get_link() : $item->get_span()).'</li>';
+            if ($item->type == 'item')
+            {
+                $class = array(); $link = true;
+                if ($n === 0) $class[] = 'first';
+                if ($n === $c - 1) $class[] = 'last';
+                if (URI::is($item->url.'(/*)?'))
+                {
+                    $class[] = 'active';
+                    $link = $this->linkActive;
+                }
+                $html .= '<li'.HTML::attributes(array('class' => implode(' ', $class))).'>'.($link ? $item->get_link() : $item->get_span()).'</li>';
+            }
+            elseif ($item->type == 'divider')
+            {
+                $html .= $item->get_divider();
+            }
 			
 			$n++;
 		}
@@ -307,6 +328,11 @@ class Menu_Item {
 	 */
 	public $https = false;
 
+    /**
+     * @var string
+     */
+    public $type = 'item';
+
 	/**
 	 * Create a new Menu_Item
 	 *
@@ -342,5 +368,54 @@ class Menu_Item {
 	{
 		return HTML::span($this->title, $this->attributes);
 	}
+
+}
+
+/**
+ * HTML Menu Item
+ *
+ * @see Menu
+ * @internal
+ */
+class Menu_Divider {
+
+    /**
+     * @var string
+     */
+    public $title = '';
+
+    /**
+     * Array of HTML attributes added to link and span.
+     *
+     * @var array
+     */
+    public $attributes = array();
+
+    /**
+     * @var string
+     */
+    public $type = 'divider';
+
+    /**
+     * Create a new Menu_Item
+     *
+     * @param  string  $title
+     * @param  array   $attributes
+     */
+    function __construct($title, array $attributes = array())
+    {
+        $this->title = $title;
+        $this->attributes = $attributes;
+    }
+
+    /**
+     * Returns a divider menu item
+     *
+     * @uses Laravel\HTML::attributes()  Generates the HTML attributes
+     */
+    function get_divider()
+    {
+        return '<li'.HTML::attributes($this->attributes).'>'.$this->title.'</li>';
+    }
 
 }
