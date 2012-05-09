@@ -34,24 +34,40 @@ Generate a simple navigation menu ('ul' is default):
 
 ```php
 echo Topos\Menu::make(array('class' => 'menu'), 'ol')
-    ->add('', 'Home')
-    ->add('blog', 'Blog')
-    ->add('about', 'About')
-    ->add('contact', 'Contact')
+    ->link('', 'Home')
+    ->link('blog', 'Blog')
+    ->link('about', 'About')
+    ->link('contact', 'Contact')
     ->render();
 ```
 
 ### Optional menu items
 
-You can also use `->add_if($test, $url, $label)` to conditionally add items, test can be any callback or boolean.
+You can also use `->link_if($test, $url, $label)` to conditionally add items, test can be any callback or boolean.
 
 ```php
 echo Topos\Menu::make()
-    ->add('', 'Home')
-    ->add('blog', 'Blog')
+    ->link('', 'Home')
+    ->link('blog', 'Blog')
     // Only show the admin item if we're in admin area
-    ->add_if(URI::is('admin(/*)?'), 'admin', 'Admin')
+    ->link_if(URI::is('admin(/*)?'), 'admin', 'Admin')
     // Only show the logout link if we're logged in
-    ->add_if(Auth::check(), 'logout', 'Logout')
+    ->link_if(Auth::check(), 'logout', 'Logout')
+    ->render();
+```
+
+### Dividers
+
+You can use `->divider($title, $attributes)` to add dividers (non-link items); useful for sidebar menus.
+
+```php
+echo Topos\Menu::make()
+    ->divider('Section 1')
+    ->link('', 'Home')
+    ->link('blog', 'Blog')
+    // Only show Section 2 if we're logged in
+    ->divider_if(Auth::check(), 'Section 2')
+    ->link_if(Auth::check(), 'me', 'Profile')
+    ->link_if(Auth::check(), 'logout', 'Logout')
     ->render();
 ```

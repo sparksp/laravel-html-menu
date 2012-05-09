@@ -13,7 +13,7 @@ use URI, URL, Request, HTML;
  *         ->divider('', array('class' => 'divider'))
  *         ->link('about', 'About')
  *         ->link('contact', 'Contact')
- *         ->get();
+ *         ->render();
  * </code>
  *
  * @category    Bundle
@@ -328,6 +328,39 @@ class Menu {
 	{
 		trigger_error('Deprecated: $menu->get() is deprecated, please use $menu->render() instead.', E_USER_DEPRECATED);
 		return $this->render($type);
+	}
+
+	/**
+	 * Add an link to the menu
+	 *
+	 * @deprecated
+	 * @param  string  $url
+	 * @param  string  $title
+	 * @param  array   $attributes
+	 * @param  bool    $https
+	 * @return Menu
+	 */
+	function add($url, $title, array $attributes = array(), $https = false)
+	{
+		trigger_error('Deprecated: $menu->add() is deprecated, please use $menu->link() instead.', E_USER_DEPRECATED);
+		return $this->add($url, $title, $attributes, $https);
+	}
+
+	/**
+	 * Add an link if the test is true
+	 *
+	 * @deprecated
+	 * @param  bool|callback  $test
+	 * @param  string  $url
+	 * @param  string  $title
+	 * @param  array  $attributes
+	 * @param  bool  $https
+	 * @return Menu
+	 */
+	function add_if($test, $url, $title, $attributes = array(), $https = false)
+	{
+		trigger_error('Deprecated: $menu->add_id() is deprecated, please use $menu->link_if() instead.', E_USER_DEPRECATED);
+		return $this->link_if($test, $url, $title, $attributes, $https);
 	}
 
 }
